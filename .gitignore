@@ -68,3 +68,6 @@ cache/
 docs/
 .odg
 .documents/
+
+### Sessions
+.session
