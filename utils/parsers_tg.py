@@ -38,7 +38,7 @@ async def menora_data():
 
 async def namomente_data():
     check_pattern = 'Тарифи уточнюйте в момент операції'
-    price_pattern = r'\d+\.\d+ \| \d+\.\d+'
+    price_pattern = r'(\d+\.\d+)\s*\|\s*(\d+\.\d+)'
     exchanger = "namomente_crypto"
     url = f"https://t.me/s/{exchanger}"
     answer = {}
@@ -56,11 +56,9 @@ async def namomente_data():
                 if check_match:
                     price_match = re.findall(price_pattern, 
                                              str(message))[0]
-                    prices = re.findall(r'\d+\.\d+', 
-                                        price_match)
                     answer.update({"exchanger": exchanger,
                                    "url": url,
-                                   "buyPrice": float(prices[1])})
+                                   "buyPrice": float(price_match[1])})
                     return answer
                 else:
                     continue
@@ -117,4 +115,4 @@ async def master_parser() -> tuple[dict, dict, dict]:
 
 
 if __name__ == "__main__":
-    asyncio.run(master_parser())
+    asyncio.run(namomente_data())
