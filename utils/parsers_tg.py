@@ -9,6 +9,7 @@ from decimal import Decimal
 async def menora_data():
     check_pattern = 'Купуємо тезер'
     price_pattern = r'\b\d+\.\d+\b'
+     
     exchanger = "Menora_Crypto"
     url = f"https://t.me/s/{exchanger}"
     answer = {}
@@ -29,7 +30,8 @@ async def menora_data():
                     prices = [float(price) for price in price_match]
                     answer.update({"exchanger": exchanger,
                                    "url": url,
-                                   "buyPrice": prices[-1]})
+                                   "buyPrice": prices[-1],
+                                   "sellPrice": prices[1]})
                     return answer
 
                 else:
@@ -58,7 +60,8 @@ async def namomente_data():
                                              str(message))[0]
                     answer.update({"exchanger": exchanger,
                                    "url": url,
-                                   "buyPrice": float(price_match[1])})
+                                   "buyPrice": float(price_match[1]),
+                                   "sellPrice": float(price_match[0])})
                     return answer
                 else:
                     continue
@@ -66,8 +69,8 @@ async def namomente_data():
 
 async def valuta_data():
     check_pattern = 'Курс дійсний протягом 1 години.'
-    usd_pattern = r"USD:\s+\d+\.\d+ / (\d+\.\d+)"
-    usdt_pattern = r"/\s*([+-]?\d+(?:\.\d+)?)\s*%"
+    usd_pattern = r"USD:\s*([\d,\.]+)\s*/\s*([\d,\.]+)"
+    usdt_pattern = r"USDT:\s*([+-]?\d+(?:\.\d+)?)%?\s*/\s*([+-]?\d+(?:\.\d+)?)%?"
     exchanger = "valuta_Dp_opt"
     url = f"https://t.me/s/{exchanger}"
     answer = {}
@@ -85,19 +88,28 @@ async def valuta_data():
                 if check_match:
                     usd_matches = re.findall(
                             usd_pattern, 
-                            str(message))
+                            str(message))[0]
                     usdt_matches = re.findall(
                             usdt_pattern, 
-                            str(message))
-                    usd_price = float(usd_matches[0])
-                    usdt_percent_price = float(usdt_matches[0])
-                    buy_price = Decimal(usd_price) + (
-                            Decimal(usdt_percent_price
-                                    ) / 100 * Decimal(usd_price))
-                    buy_price = float('{:.3f}'.format(buy_price))
+                            str(message))[0]
+                    usd_sell_price = usd_matches[0]
+                    usdt_sell_percent = usdt_matches[0]
+                     
+                    usd_sell_price = usd_matches[0]
+                    usdt_sell_percent = usdt_matches[0]
+                    uah_to_usdt_price = float(Decimal(usd_sell_price) + (
+                            Decimal(usdt_sell_percent
+                                    ) / 100 * Decimal(usd_sell_price)))
+
+                    usd_buy_price = usd_matches[-1]
+                    usdt_buy_percent = usdt_matches[-1]
+                    usd_to_uah_price = float(Decimal(usd_buy_price) + (
+                            Decimal(usdt_buy_percent
+                                    ) / 100 * Decimal(usd_buy_price)))
                     answer.update({"exchanger": exchanger,
                                    "url": url,
-                                   "buyPrice": buy_price})
+                                   "buyPrice": usd_to_uah_price,
+                                   "sellPrice": uah_to_usdt_price})
                     return answer
                 else:
                     continue
@@ -115,4 +127,6 @@ async def master_parser() -> tuple[dict, dict, dict]:
 
 
 if __name__ == "__main__":
-    asyncio.run(namomente_data())
+    print(asyncio.run(menora_data()))
+    print(asyncio.run(namomente_data()))
+    print(asyncio.run(valuta_data()))

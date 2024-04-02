@@ -9,9 +9,11 @@ def start() -> InlineKeyboardMarkup:
         text="Обновить данные",
         callback_data="update_start"))
     builder.row(InlineKeyboardButton(
-        text="Обновить лимит спреда",
-        callback_data="update_spread_limit"))
-
+        text="Купить на Binance, продать в обменнике",
+        callback_data="update_spread_limit_buy_binance_sell_exchanger"))
+    builder.row(InlineKeyboardButton(
+        text="Купить в обменнике, продать на Binance",
+        callback_data="update_spread_limit_buy_exchanger_sell_binance"))
     return builder.as_markup()
 
 
